@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,7 +30,7 @@ class RegisteredUserController extends Controller
             'uloga'    => ['required', 'in:racunovodja,direktor'],
         ]);
 
-       $user = User::create([
+        $user = User::create([
             'ime'          => $request->ime,
             'prezime'      => $request->prezime,
             'email'        => $request->email,
@@ -42,7 +41,6 @@ class RegisteredUserController extends Controller
             'status'       => 'na_cekanju',
         ]);
 
-        event(new Registered($user));
         Auth::login($user);
 
         try {
@@ -50,6 +48,7 @@ class RegisteredUserController extends Controller
         } catch (\Exception $e) {
             \Log::error('Mail error: ' . $e->getMessage());
         }
+
         return redirect()->route('preduzece.create');
     }
 }
