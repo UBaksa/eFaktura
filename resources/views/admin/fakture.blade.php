@@ -3,7 +3,23 @@
 
 @section('content')
 <h1 class="text-2xl font-bold mb-6">Sve fakture u sistemu</h1>
-
+<form method="GET" action="{{ route('admin.fakture') }}" class="mb-6 flex gap-3 flex-wrap">
+    <input type="text" name="pretraga" value="{{ $pretraga ?? '' }}"
+        placeholder="Pretraži po broju fakture ili preduzeću..."
+        class="flex-1 border rounded px-4 py-2 focus:outline-none focus:border-blue-600 min-w-48">
+    <input type="date" name="datum_od" value="{{ $datumOd ?? '' }}"
+        class="border rounded px-4 py-2 focus:outline-none focus:border-blue-600">
+    <input type="date" name="datum_do" value="{{ $datumDo ?? '' }}"
+        class="border rounded px-4 py-2 focus:outline-none focus:border-blue-600">
+    <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-600">
+        Pretraži
+    </button>
+    @if(($pretraga ?? false) || ($datumOd ?? false) || ($datumDo ?? false))
+        <a href="{{ route('admin.fakture') }}" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">
+            Resetuj
+        </a>
+    @endif
+</form>
 <div class="bg-white rounded-lg shadow overflow-hidden">
     <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b">

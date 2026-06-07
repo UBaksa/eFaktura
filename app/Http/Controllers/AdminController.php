@@ -68,10 +68,34 @@ class AdminController extends Controller
         return back()->with('success', 'Status korisnika je promenjen.');
     }
 
-    public function fakture()
+    public function fakture(Request $request)
     {
-        $fakture = Faktura::with(['preduzece', 'komitent', 'korisnik'])->latest()->paginate(20);
-        return view('admin.fakture', compact('fakture'));
+        $pretraga = $request->input('pretraga');
+        $datumOd = $request->input('datum_od');
+        $datumDo = $request->input('datum_do');
+
+        $query = Faktura::with(['preduzece', 'komitent', 'korisnik'])->latest();
+
+        if ($pretraga) {
+            $query->where(function($q) use ($pretraga) {
+                $q->where('broj_fakture', 'like', '%' . $pretraga . '%')
+                ->orWhereHas('preduzece', function($q2) use ($pretraga) {
+                    $q2->where('naziv', 'like', '%' . $pretraga . '%');
+                });
+            });
+        }
+
+        if ($datumOd) {
+            $query->whereDate('datum_izdavanja', '>=', $datumOd);
+        }
+
+        if ($datumDo) {
+            $query->whereDate('datum_izdavanja', '<=', $datumDo);
+        }
+
+        $fakture = $query->paginate(20);
+
+        return view('admin.fakture', compact('fakture', 'pretraga', 'datumOd', 'datumDo'));
     }
 
     public function statistike()
