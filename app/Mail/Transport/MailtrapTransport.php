@@ -2,12 +2,8 @@
 
 namespace App\Mail\Transport;
 
-use Mailtrap\Config as MailtrapConfig;
-use Mailtrap\MailtrapClient;
-use Mailtrap\Mime\MailtrapEmail;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\MessageConverter;
 
 class MailtrapTransport extends AbstractTransport
@@ -20,30 +16,36 @@ class MailtrapTransport extends AbstractTransport
     protected function doSend(SentMessage $message): void
     {
         $originalMessage = MessageConverter::toEmail($message->getOriginalMessage());
-        
-        $mailtrap = new MailtrapClient(new MailtrapConfig($this->apiToken));
-        
-        $email = (new MailtrapEmail())
-            ->from(new Address(
-                $originalMessage->getFrom()[0]->getAddress(),
-                $originalMessage->getFrom()[0]->getName()
-            ))
-            ->subject($originalMessage->getSubject() ?? '');
 
+        $from = $originalMessage->getFrom()[0];
+        $toList = [];
         foreach ($originalMessage->getTo() as $to) {
-            $email->addTo(new Address($to->getAddress(), $to->getName()));
+            $toList[] = ['email' => $to->getAddress(), 'name' => $to->getName()];
         }
 
-        $html = $originalMessage->getHtmlBody();
-        $text = $originalMessage->getTextBody();
-        
-        if ($html) {
-            $email->html($html);
-        } elseif ($text) {
-            $email->text($text);
-        }
+        $body = [
+            'from' => ['email' => $from->getAddress(), 'name' => $from->getName()],
+            'to' => $toList,
+            'subject' => $originalMessage->getSubject() ?? '',
+            'html' => $originalMessage->getHtmlBody() ?? $originalMessage->getTextBody() ?? '',
+            'text' => $originalMessage->getTextBody() ?? '',
+        ];
 
-        $mailtrap->sending()->emails()->send($email);
+        $ch = curl_init('https://send.api.mailtrap.io/api/send');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $this->apiToken,
+            'Content-Type: application/json',
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            throw new \Exception('Mailtrap API error: ' . $response);
+        }
     }
 
     public function __toString(): string
