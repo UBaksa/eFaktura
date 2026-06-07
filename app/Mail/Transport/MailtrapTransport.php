@@ -3,13 +3,11 @@
 namespace App\Mail\Transport;
 
 use Mailtrap\Config as MailtrapConfig;
-use Mailtrap\Helper\ResponseHelper;
 use Mailtrap\MailtrapClient;
-use Symfony\Component\Mailer\Envelope;
+use Mailtrap\Mime\MailtrapEmail;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\MessageConverter;
 
 class MailtrapTransport extends AbstractTransport
@@ -25,16 +23,24 @@ class MailtrapTransport extends AbstractTransport
         
         $mailtrap = new MailtrapClient(new MailtrapConfig($this->apiToken));
         
-        $email = (new \Mailtrap\Model\Email\Sending\Email())
+        $email = (new MailtrapEmail())
             ->from(new Address(
                 $originalMessage->getFrom()[0]->getAddress(),
                 $originalMessage->getFrom()[0]->getName()
             ))
-            ->subject($originalMessage->getSubject() ?? '')
-            ->html($originalMessage->getHtmlBody() ?? $originalMessage->getTextBody() ?? '');
+            ->subject($originalMessage->getSubject() ?? '');
 
         foreach ($originalMessage->getTo() as $to) {
             $email->addTo(new Address($to->getAddress(), $to->getName()));
+        }
+
+        $html = $originalMessage->getHtmlBody();
+        $text = $originalMessage->getTextBody();
+        
+        if ($html) {
+            $email->html($html);
+        } elseif ($text) {
+            $email->text($text);
         }
 
         $mailtrap->sending()->emails()->send($email);
