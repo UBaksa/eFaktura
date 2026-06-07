@@ -9,7 +9,12 @@ export default defineConfig({
         }),
     ],
     build: {
-        manifest: true,
+        manifest: 'manifest.json',
         outDir: 'public/build',
+        rollupOptions: {
+            output: {
+                manualChunks: undefined,
+            },
+        },
     },
 });
