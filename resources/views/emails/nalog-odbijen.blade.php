@@ -33,7 +33,6 @@
             <p>Email: {{ $user->email }}<br>Uloga: {{ ucfirst($user->uloga) }}</p>
         </div>
         <div class="footer">
-            <p>© 2026 eFaktura — Državni univerzitet u Novom Pazaru</p>
             <p>Republika Srbija · Ministarstvo finansija · Poreska uprava</p>
         </div>
     </div>

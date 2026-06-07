@@ -37,7 +37,6 @@
             <p>Ukoliko smatrate da je ovo greška ili imate pitanja, kontaktirajte administratora sistema.</p>
         </div>
         <div class="footer">
-            <p>© 2026 eFaktura — Državni univerzitet u Novom Pazaru</p>
             <p>Republika Srbija · Ministarstvo finansija · Poreska uprava</p>
         </div>
     </div>
