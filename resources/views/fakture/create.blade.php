@@ -56,7 +56,7 @@
             <div class="mb-6">
                 <div class="flex justify-between items-center mb-3">
                     <h2 class="text-lg font-semibold">Stavke fakture</h2>
-                    <button type="button" onclick="dodajStavku()"
+                    <button type="button" id="dodaj-stavku-btn"
                         class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-500">
                         + Dodaj stavku
                     </button>
@@ -101,8 +101,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">
                     Prateći dokument <span class="text-gray-400 text-xs">(opciono — otpremnica, ugovor, itd.)</span>
                 </label>
-                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition cursor-pointer"
-                    onclick="document.getElementById('dokument').click()">
+                <div id="dokument-zona" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition cursor-pointer">
                     <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
@@ -112,8 +111,7 @@
                     <p id="naziv-dokumenta" class="text-blue-600 text-sm font-medium mt-2 hidden"></p>
                 </div>
                 <input type="file" id="dokument" name="dokument"
-                    accept=".pdf,.jpg,.jpeg,.png" class="hidden"
-                    onchange="prikaziNazivDokumenta(this)">
+                    accept=".pdf,.jpg,.jpeg,.png" class="hidden">
             </div>
 
             <div class="flex gap-4">
@@ -133,47 +131,58 @@
 <script>
 let brojStavki = 1;
 
-function dodajStavku() {
-    const container = document.getElementById('stavke-container');
-    const i = brojStavki++;
-    const div = document.createElement('div');
-    div.className = 'stavka grid grid-cols-6 gap-2 mb-2 items-end';
-    div.innerHTML = `
-        <div class="col-span-2">
-            <input type="text" name="stavke[${i}][naziv]"
-                placeholder="Naziv" class="w-full border rounded px-2 py-1 text-sm" required>
-        </div>
-        <div>
-            <input type="number" name="stavke[${i}][kolicina]" step="0.001" min="0.001"
-                placeholder="Kol." class="w-full border rounded px-2 py-1 text-sm" required>
-        </div>
-        <div>
-            <input type="text" name="stavke[${i}][jedinica_mere]"
-                placeholder="kom" class="w-full border rounded px-2 py-1 text-sm" required>
-        </div>
-        <div>
-            <input type="number" name="stavke[${i}][cena_bez_pdv]" step="0.01" min="0"
-                placeholder="Cena" class="w-full border rounded px-2 py-1 text-sm" required>
-        </div>
-        <div class="flex gap-1">
-            <select name="stavke[${i}][pdv_stopa]" class="w-full border rounded px-2 py-1 text-sm">
-                <option value="0">0%</option>
-                <option value="10">10%</option>
-                <option value="20" selected>20%</option>
-            </select>
-            <button type="button" onclick="this.closest('.stavka').remove()"
-                class="bg-red-500 text-white px-2 rounded text-sm hover:bg-red-400">✕</button>
-        </div>
-    `;
-    container.appendChild(div);
-}
+document.addEventListener('DOMContentLoaded', function() {
+    // Dodaj stavku
+    document.getElementById('dodaj-stavku-btn').addEventListener('click', function() {
+        const container = document.getElementById('stavke-container');
+        const i = brojStavki++;
+        const div = document.createElement('div');
+        div.className = 'stavka grid grid-cols-6 gap-2 mb-2 items-end';
+        div.innerHTML = `
+            <div class="col-span-2">
+                <input type="text" name="stavke[${i}][naziv]"
+                    placeholder="Naziv" class="w-full border rounded px-2 py-1 text-sm" required>
+            </div>
+            <div>
+                <input type="number" name="stavke[${i}][kolicina]" step="0.001" min="0.001"
+                    placeholder="Kol." class="w-full border rounded px-2 py-1 text-sm" required>
+            </div>
+            <div>
+                <input type="text" name="stavke[${i}][jedinica_mere]"
+                    placeholder="kom" class="w-full border rounded px-2 py-1 text-sm" required>
+            </div>
+            <div>
+                <input type="number" name="stavke[${i}][cena_bez_pdv]" step="0.01" min="0"
+                    placeholder="Cena" class="w-full border rounded px-2 py-1 text-sm" required>
+            </div>
+            <div class="flex gap-1">
+                <select name="stavke[${i}][pdv_stopa]" class="w-full border rounded px-2 py-1 text-sm">
+                    <option value="0">0%</option>
+                    <option value="10">10%</option>
+                    <option value="20" selected>20%</option>
+                </select>
+                <button type="button" class="obrisi-stavku bg-red-500 text-white px-2 rounded text-sm hover:bg-red-400">✕</button>
+            </div>
+        `;
+        container.appendChild(div);
 
-function prikaziNazivDokumenta(input) {
-    const naziv = document.getElementById('naziv-dokumenta');
-    if (input.files && input.files[0]) {
-        naziv.textContent = '✓ ' + input.files[0].name;
-        naziv.classList.remove('hidden');
-    }
-}
+        div.querySelector('.obrisi-stavku').addEventListener('click', function() {
+            div.remove();
+        });
+    });
+
+    // Upload dokument
+    document.getElementById('dokument-zona').addEventListener('click', function() {
+        document.getElementById('dokument').click();
+    });
+
+    document.getElementById('dokument').addEventListener('change', function() {
+        const naziv = document.getElementById('naziv-dokumenta');
+        if (this.files && this.files[0]) {
+            naziv.textContent = '✓ ' + this.files[0].name;
+            naziv.classList.remove('hidden');
+        }
+    });
+});
 </script>
 @endsection
