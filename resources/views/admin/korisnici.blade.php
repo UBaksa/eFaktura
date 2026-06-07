@@ -4,6 +4,21 @@
 @section('content')
 <h1 class="text-2xl font-bold mb-6">Upravljanje korisnicima</h1>
 
+<!-- Pretraga -->
+<form method="GET" action="{{ route('admin.korisnici') }}" class="mb-6 flex gap-3">
+    <input type="text" name="pretraga" value="{{ $pretraga ?? '' }}"
+        placeholder="Pretraži po imenu, prezimenu, emailu ili preduzeću..."
+        class="flex-1 border rounded px-4 py-2 focus:outline-none focus:border-blue-600">
+    <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-600">
+        Pretraži
+    </button>
+    @if($pretraga ?? false)
+        <a href="{{ route('admin.korisnici') }}" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">
+            Resetuj
+        </a>
+    @endif
+</form>
+
 <!-- Na čekanju -->
 @if($naCekanju->count() > 0)
 <div class="bg-yellow-50 border border-yellow-200 rounded-lg mb-6">
@@ -51,7 +66,7 @@
                         </button>
                     </form>
                     <form method="POST" action="{{ route('admin.korisnici.obrisi', $korisnik) }}"
-                        onsubmit="return confirm('Da li ste sigurni da želite da obrišete korisnika {{ $korisnik->ime }} {{ $korisnik->prezime }}?')">
+                        onsubmit="return confirm('Da li ste sigurni?')">
                         @csrf @method('DELETE')
                         <button class="bg-gray-800 text-white px-3 py-1 rounded text-xs hover:bg-gray-700">
                             Obriši
@@ -131,7 +146,7 @@
                         </button>
                     </form>
                     <form method="POST" action="{{ route('admin.korisnici.obrisi', $korisnik) }}"
-                        onsubmit="return confirm('Da li ste sigurni da želite da obrišete korisnika {{ $korisnik->ime }} {{ $korisnik->prezime }}?')">
+                        onsubmit="return confirm('Da li ste sigurni?')">
                         @csrf @method('DELETE')
                         <button class="bg-gray-800 text-white px-3 py-1 rounded text-xs hover:bg-gray-700">
                             Obriši
@@ -188,7 +203,7 @@
                         </button>
                     </form>
                     <form method="POST" action="{{ route('admin.korisnici.obrisi', $korisnik) }}"
-                        onsubmit="return confirm('Da li ste sigurni da želite da obrišete korisnika {{ $korisnik->ime }} {{ $korisnik->prezime }}?')">
+                        onsubmit="return confirm('Da li ste sigurni?')">
                         @csrf @method('DELETE')
                         <button class="bg-gray-800 text-white px-3 py-1 rounded text-xs hover:bg-gray-700">
                             Obriši
@@ -215,7 +230,7 @@
             <div class="mb-4">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Obrazloženje *</label>
                 <textarea name="obrazlozenje" rows="3" required
-                    placeholder="Unesite razlog deaktivacije koji će biti poslat korisniku..."
+                    placeholder="Unesite razlog deaktivacije..."
                     class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-blue-600 focus:outline-none transition"></textarea>
             </div>
             <div class="flex gap-3">
@@ -239,7 +254,6 @@ function otvoriModal(id, naziv) {
     document.getElementById('modal-deaktivacija').classList.remove('hidden');
     document.getElementById('modal-deaktivacija').classList.add('flex');
 }
-
 function zatvoriModal() {
     document.getElementById('modal-deaktivacija').classList.add('hidden');
     document.getElementById('modal-deaktivacija').classList.remove('flex');

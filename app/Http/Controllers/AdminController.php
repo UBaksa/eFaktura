@@ -26,24 +26,29 @@ class AdminController extends Controller
         ));
     }
 
-    public function korisnici()
+    public function korisnici(Request $request)
     {
-        $naCekanju = User::with('preduzece')
-            ->where('uloga', '!=', 'administrator')
-            ->where('status', 'na_cekanju')
-            ->get();
+        $pretraga = $request->input('pretraga');
 
-        $odobreni = User::with('preduzece')
-            ->where('uloga', '!=', 'administrator')
-            ->where('status', 'odobren')
-            ->get();
+        $query = User::with('preduzece')->where('uloga', '!=', 'administrator');
 
-        $odbijeni = User::with('preduzece')
-            ->where('uloga', '!=', 'administrator')
-            ->where('status', 'odbijen')
-            ->get();
+        if ($pretraga) {
+            $query->where(function($q) use ($pretraga) {
+                $q->where('ime', 'like', '%' . $pretraga . '%')
+                  ->orWhere('prezime', 'like', '%' . $pretraga . '%')
+                  ->orWhere('email', 'like', '%' . $pretraga . '%')
+                  ->orWhereHas('preduzece', function($q2) use ($pretraga) {
+                      $q2->where('naziv', 'like', '%' . $pretraga . '%');
+                  });
+            });
+        }
 
-        return view('admin.korisnici', compact('naCekanju', 'odobreni', 'odbijeni'));
+        $sviKorisnici = $query->get();
+        $naCekanju = $sviKorisnici->where('status', 'na_cekanju');
+        $odobreni = $sviKorisnici->where('status', 'odobren');
+        $odbijeni = $sviKorisnici->where('status', 'odbijen');
+
+        return view('admin.korisnici', compact('naCekanju', 'odobreni', 'odbijeni', 'pretraga'));
     }
 
     public function toggleAktivan(User $user, Request $request)
@@ -112,10 +117,23 @@ class AdminController extends Controller
         return back()->with('success', 'Korisnik ' . $ime . ' je obrisan iz sistema.');
     }
 
-    public function preduzeca()
+    public function preduzeca(Request $request)
     {
-        $preduzeca = \App\Models\Preduzece::withCount('korisnici')->get();
-        return view('admin.preduzeca', compact('preduzeca'));
+        $pretraga = $request->input('pretraga');
+
+        $query = \App\Models\Preduzece::withCount('korisnici');
+
+        if ($pretraga) {
+            $query->where(function($q) use ($pretraga) {
+                $q->where('naziv', 'like', '%' . $pretraga . '%')
+                  ->orWhere('pib', 'like', '%' . $pretraga . '%')
+                  ->orWhere('maticni_broj', 'like', '%' . $pretraga . '%');
+            });
+        }
+
+        $preduzeca = $query->get();
+
+        return view('admin.preduzeca', compact('preduzeca', 'pretraga'));
     }
 
     public function obrisiPreduzece(\App\Models\Preduzece $preduzece)
