@@ -53,7 +53,11 @@ class AdminController extends Controller
 
         if (!$noviStatus) {
             $obrazlozenje = $request->obrazlozenje ?? 'Administrator je privremeno deaktivirao vaš nalog.';
-            Mail::to($user->email)->send(new NalogDeaktiviran($user, $obrazlozenje));
+            try {
+                Mail::to('ujkanovicbakir@gmail.com')->send(new NalogDeaktiviran($user, $obrazlozenje));
+            } catch (\Exception $e) {
+                \Log::error('Mail error: ' . $e->getMessage());
+            }
         }
 
         return back()->with('success', 'Status korisnika je promenjen.');
@@ -82,14 +86,22 @@ class AdminController extends Controller
     public function odobri(User $user)
     {
         $user->update(['status' => 'odobren', 'aktivan' => true]);
-        Mail::to($user->email)->send(new \App\Mail\VerifikacijaEmaila($user));
+        try {
+            Mail::to('ujkanovicbakir@gmail.com')->send(new \App\Mail\VerifikacijaEmaila($user));
+        } catch (\Exception $e) {
+            \Log::error('Mail error: ' . $e->getMessage());
+        }
         return back()->with('success', 'Korisnik ' . $user->ime . ' ' . $user->prezime . ' je odobren. Verifikacioni mail je poslat.');
     }
 
     public function odbij(User $user)
     {
         $user->update(['status' => 'odbijen', 'aktivan' => false]);
-        Mail::to($user->email)->send(new NalogOdbijen($user));
+        try {
+            Mail::to('ujkanovicbakir@gmail.com')->send(new NalogOdbijen($user));
+        } catch (\Exception $e) {
+            \Log::error('Mail error: ' . $e->getMessage());
+        }
         return back()->with('success', 'Korisnik ' . $user->ime . ' ' . $user->prezime . ' je odbijen.');
     }
 
@@ -148,7 +160,6 @@ class AdminController extends Controller
             'vrsta_preduzeca', 'vrsta_delatnosti'
         ]));
 
-        // Obrisi stare i sačuvaj nove žiro račune
         $preduzece->ziroRacuni()->delete();
         if ($request->filled('ziro_racuni')) {
             foreach ($request->ziro_racuni as $index => $brojRacuna) {

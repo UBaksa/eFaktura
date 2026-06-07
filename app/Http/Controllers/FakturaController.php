@@ -50,7 +50,6 @@ class FakturaController extends Controller
             'datum_valute'            => 'required|date|after_or_equal:datum_izdavanja',
             'valuta'                  => 'required|string|size:3',
             'napomena'                => 'nullable|string',
-            'dokument'                => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'stavke'                  => 'required|array|min:1',
             'stavke.*.naziv'          => 'required|string|max:200',
             'stavke.*.kolicina'       => 'required|numeric|min:0.001',
@@ -62,45 +61,17 @@ class FakturaController extends Controller
         $preduzece_id = auth()->user()->preduzece_id;
         $broj = 'F-' . date('Y') . '-' . str_pad(Faktura::where('preduzece_id', $preduzece_id)->count() + 1, 4, '0', STR_PAD_LEFT);
 
-        // Upload pratećeg dokumenta ako postoji
-        $dokumentUrl = null;
-        $dokumentPublicId = null;
-
-        if ($request->hasFile('dokument')) {
-            \Cloudinary\Configuration\Configuration::instance([
-                'cloud' => [
-                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                    'api_key'    => env('CLOUDINARY_API_KEY'),
-                    'api_secret' => env('CLOUDINARY_API_SECRET'),
-                ],
-                'url' => ['secure' => true]
-            ]);
-
-            $result = (new \Cloudinary\Api\Upload\UploadApi())->upload(
-                $request->file('dokument')->getRealPath(),
-                [
-                    'folder'        => 'efaktura/dokumenti',
-                    'resource_type' => 'auto',
-                ]
-            );
-
-            $dokumentUrl      = $result['secure_url'];
-            $dokumentPublicId = $result['public_id'];
-        }
-
         $faktura = Faktura::create([
-            'broj_fakture'       => $broj,
-            'datum_izdavanja'    => $request->datum_izdavanja,
-            'datum_valute'       => $request->datum_valute,
-            'tip'                => 'izlazna',
-            'status'             => 'poslata',
-            'valuta'             => strtoupper($request->valuta),
-            'napomena'           => $request->napomena,
-            'dokument_url'       => $dokumentUrl,
-            'dokument_public_id' => $dokumentPublicId,
-            'preduzece_id'       => $preduzece_id,
-            'komitent_id'        => $request->komitent_id,
-            'korisnik_id'        => auth()->id(),
+            'broj_fakture'    => $broj,
+            'datum_izdavanja' => $request->datum_izdavanja,
+            'datum_valute'    => $request->datum_valute,
+            'tip'             => 'izlazna',
+            'status'          => 'poslata',
+            'valuta'          => strtoupper($request->valuta),
+            'napomena'        => $request->napomena,
+            'preduzece_id'    => $preduzece_id,
+            'komitent_id'     => $request->komitent_id,
+            'korisnik_id'     => auth()->id(),
         ]);
 
         foreach ($request->stavke as $stavka) {
@@ -152,16 +123,16 @@ class FakturaController extends Controller
                     'status'              => 'poslata',
                     'valuta'              => $faktura->valuta,
                     'napomena'            => $faktura->napomena,
-                    'dokument_url'        => $faktura->dokument_url,
-                    'dokument_public_id'  => $faktura->dokument_public_id,
                     'preduzece_id'        => $komitentPreduzece->id,
                     'komitent_id'         => $komitentKodPrimaoca->id,
                     'korisnik_id'         => $korisnikPrimaoca->id,
                     'povezana_faktura_id' => $faktura->id,
                 ]);
 
+                // Povezi izlaznu fakturu sa ulaznom
                 $faktura->update(['povezana_faktura_id' => $ulaznaFaktura->id]);
 
+                // Kopiraj stavke
                 foreach ($faktura->stavke as $stavka) {
                     \App\Models\StavkaFakture::create([
                         'naziv'         => $stavka->naziv,
@@ -177,8 +148,11 @@ class FakturaController extends Controller
             }
         }
 
-        if ($faktura->komitent->email) {
-            Mail::to($faktura->komitent->email)->send(new FakturaKreirana($faktura));
+        // Pošalji mail komitentu
+        try {
+            Mail::to('ujkanovicbakir@gmail.com')->send(new FakturaKreirana($faktura));
+        } catch (\Exception $e) {
+            \Log::error('Mail error: ' . $e->getMessage());
         }
 
         return redirect()->route('fakture.index')->with('success', 'Faktura je uspešno kreirana.');
@@ -249,6 +223,7 @@ class FakturaController extends Controller
             'razlog_odbijanja' => $request->razlog_odbijanja,
         ]);
 
+        // Azuriraj povezanu fakturu
         if ($faktura->povezana_faktura_id) {
             \App\Models\Faktura::find($faktura->povezana_faktura_id)
                 ->update([

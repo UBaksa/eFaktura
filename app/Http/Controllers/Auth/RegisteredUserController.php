@@ -46,11 +46,10 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         try {
-        Mail::to($user->email)->send(new KorisnikRegistrovan($user));
+            Mail::to('ujkanovicbakir@gmail.com')->send(new KorisnikRegistrovan($user));
         } catch (\Exception $e) {
             \Log::error('Mail error: ' . $e->getMessage());
         }
-
         return redirect()->route('preduzece.create');
     }
 }
