@@ -15,7 +15,7 @@
     <input type="text" name="pretraga" value="{{ request('pretraga') }}"
         placeholder="Pretraži po nazivu, PIB-u,MB-u, adresi..."
         class="border rounded px-3 py-2 flex-1">
-    <select name="tip" class="border rounded px-3 py-2">
+    <select name="tip" class="border border-gray-300 pl-3 pr-8 py-2 focus:outline-none bg-white text-gray-700">
         <option value="">Svi tipovi</option>
         <option value="klijent" {{ request('tip') == 'klijent' ? 'selected' : '' }}>Klijent</option>
         <option value="dobavljac" {{ request('tip') == 'dobavljac' ? 'selected' : '' }}>Dobavljač</option>

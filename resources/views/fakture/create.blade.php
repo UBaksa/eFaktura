@@ -9,15 +9,6 @@
         <form method="POST" action="{{ route('fakture.store') }}" id="forma-fakture" enctype="multipart/form-data">
             @csrf
             <div class="grid grid-cols-2 gap-4 mb-4">
-                <!-- <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tip fakture *</label>
-                    <select name="tip" class="w-full border rounded px-3 py-2 @error('tip') border-red-500 @enderror">
-                        <option value="izlazna" {{ old('tip') == 'izlazna' ? 'selected' : '' }}>Izlazna (šaljemo)</option>
-                        <option value="ulazna" {{ old('tip') == 'ulazna' ? 'selected' : '' }}>Ulazna (primamo)</option>
-                    </select>
-                    @error('tip') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                </div> -->
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Komitent *</label>
                     <select name="komitent_id" class="w-full border rounded px-3 py-2 @error('komitent_id') border-red-500 @enderror">
@@ -104,25 +95,27 @@
                     </div>
                 </div>
             </div>
-<!-- Prateći dokument -->
-<div class="mb-6">
-    <label class="block text-sm font-medium text-gray-700 mb-1">
-        Prateći dokument <span class="text-gray-400 text-xs">(opciono — otpremnica, ugovor, itd.)</span>
-    </label>
-    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition cursor-pointer"
-        onclick="document.getElementById('dokument').click()">
-        <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-        </svg>
-        <p class="text-gray-500 text-sm mb-1">Kliknite da uploadujete dokument</p>
-        <p class="text-gray-400 text-xs">PDF, JPG, PNG — maksimalno 5MB</p>
-        <p id="naziv-dokumenta" class="text-blue-600 text-sm font-medium mt-2 hidden"></p>
-    </div>
-    <input type="file" id="dokument" name="dokument"
-        accept=".pdf,.jpg,.jpeg,.png" class="hidden"
-        onchange="prikaziNazivDokumenta(this)">
-</div>
+
+            <!-- Prateći dokument -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Prateći dokument <span class="text-gray-400 text-xs">(opciono — otpremnica, ugovor, itd.)</span>
+                </label>
+                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition cursor-pointer"
+                    onclick="document.getElementById('dokument').click()">
+                    <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <p class="text-gray-500 text-sm mb-1">Kliknite da uploadujete dokument</p>
+                    <p class="text-gray-400 text-xs">PDF, JPG, PNG — maksimalno 5MB</p>
+                    <p id="naziv-dokumenta" class="text-blue-600 text-sm font-medium mt-2 hidden"></p>
+                </div>
+                <input type="file" id="dokument" name="dokument"
+                    accept=".pdf,.jpg,.jpeg,.png" class="hidden"
+                    onchange="prikaziNazivDokumenta(this)">
+            </div>
+
             <div class="flex gap-4">
                 <button type="submit"
                     class="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-600">
@@ -173,6 +166,14 @@ function dodajStavku() {
         </div>
     `;
     container.appendChild(div);
+}
+
+function prikaziNazivDokumenta(input) {
+    const naziv = document.getElementById('naziv-dokumenta');
+    if (input.files && input.files[0]) {
+        naziv.textContent = '✓ ' + input.files[0].name;
+        naziv.classList.remove('hidden');
+    }
 }
 </script>
 @endsection
