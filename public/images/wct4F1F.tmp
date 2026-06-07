@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <codec version="8.0.0.54" minapplicableonedriveversion="26.0.0.0">
+    <x86 url="https://oneclient.sfx.ms/Win/Codec/8.0.0.54/26.018.0127.0001/OneDriveCodec.cab" sha256hash="iYrk+oP9XxsOA7c8g/9AIltuA2ra0TIDVd6XyMzf5M0=" />
+    <amd64 url="https://oneclient.sfx.ms/Win/Codec/8.0.0.54/26.018.0127.0001/amd64/OneDriveCodec.cab" sha256hash="jz+is4xzGLsr5D9kWPBv/2B/ThMutrBUWbDh1clCqt8=" />
+    <arm64 url="https://oneclient.sfx.ms/Win/Codec/8.0.0.54/26.018.0127.0001/arm64/OneDriveCodec.cab" sha256hash="66tFIwQEuuhLL//DYZcu0DoSownZDVkMnPG61mziQRI=" />
+  </codec>
+</root>
