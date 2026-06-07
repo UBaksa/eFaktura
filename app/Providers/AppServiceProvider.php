@@ -11,7 +11,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Mail::extend('mailtrap', function () {
-            return new MailtrapTransport(config('mail.mailtrap_token'));
+            return new MailtrapTransport(env('MAILTRAP_API_TOKEN'));
         });
     }
 }
